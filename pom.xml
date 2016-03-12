@@ -1,0 +1,528 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.bahadirakin</groupId>
+    <artifactId>grand-parent-pom</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+
+    <name>grand-parent-pom</name>
+    <url>https://github.com/bhdrkn/grand-parent-pom</url>
+    <inceptionYear>2016</inceptionYear>
+
+    <description>
+        A parent-pom that ensures general code quality
+    </description>
+
+    <scm>
+        <connection>scm:git:git://github.com/bhdrkn/grand-parent-pom</connection>
+        <developerConnection>scm:git:ssh://git@github.com/bhdrkn/grand-parent-pom</developerConnection>
+        <url>https://github.com/bhdrkn/grand-parent-pom</url>
+    </scm>
+
+    <issueManagement>
+        <system>GrandParent Pom</system>
+        <url>https://github.com/bhdrkn/grand-parent-pom/issues</url>
+    </issueManagement>
+
+    <ciManagement>
+        <system>Travis</system>
+        <url>https://travis-ci.org/bhdrkn/grand-parent-pom</url>
+    </ciManagement>
+
+    <licenses>
+        <license>
+            <name>The Apache Software License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <distributionManagement>
+        <repository>
+            <id>grand-parent-pom-releases</id>
+            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+        </repository>
+        <snapshotRepository>
+            <id>grand-parent-pom-snapshots</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+        </snapshotRepository>
+    </distributionManagement>
+
+    <prerequisites>
+        <maven>3.0</maven>
+    </prerequisites>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+        <!-- Flags -->
+        <skip.jacoco.check>false</skip.jacoco.check>
+        <skip.checkstyle.check>false</skip.checkstyle.check>
+        <skip.findbugs.check>false</skip.findbugs.check>
+
+        <!-- Rules -->
+        <rule.branch.coverage>0.50</rule.branch.coverage>
+        <rule.line.coverage>0.50</rule.line.coverage>
+        <rule.line.length>120</rule.line.length>
+
+        <!-- Plugin Versions -->
+        <plugin.jacoco.version>0.7.6.201602180812</plugin.jacoco.version>
+        <plugin.checkstyle.version>2.17</plugin.checkstyle.version>
+        <plugin.findbugs.version>3.0.3</plugin.findbugs.version>
+        <plugin.surefire.version>2.19.1</plugin.surefire.version>
+
+        <!-- Versions -->
+        <checkstyle.version>6.16.1</checkstyle.version>
+        <findbugs.version>3.0.1</findbugs.version>
+
+        <!-- Other -->
+        <surefire.args>-Xmx512m</surefire.args>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.google.code.findbugs</groupId>
+            <artifactId>findbugs-annotations</artifactId>
+            <version>${findbugs.version}</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <!-- the surefire plugin -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <argLine>${jacocoArgLine} ${surefire.args}</argLine>
+                </configuration>
+            </plugin>
+
+            <!-- Jacoco Plugin: Ensures minimum test coverage -->
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>pre-unit-tests</id>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                        <configuration>
+                            <propertyName>jacocoArgLine</propertyName>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>post-unit-test</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>default-jacoco-check</id>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                        <configuration>
+                            <skip>${skip.jacoco.check}</skip>
+                            <rules>
+                                <rule>
+                                    <element>CLASS</element>
+                                    <limits>
+                                        <limit>
+                                            <counter>LINE</counter>
+                                            <value>COVEREDRATIO</value>
+                                            <minimum>${rule.line.coverage}</minimum>
+                                        </limit>
+                                        <limit>
+                                            <counter>BRANCH</counter>
+                                            <value>COVEREDRATIO</value>
+                                            <minimum>${rule.branch.coverage}</minimum>
+                                        </limit>
+                                    </limits>
+                                </rule>
+                            </rules>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- Checkstyle: Ensures similar code structure -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-checkstyle-plugin</artifactId>
+                <dependencies>
+                    <dependency>
+                        <groupId>com.puppycrawl.tools</groupId>
+                        <artifactId>checkstyle</artifactId>
+                        <version>${checkstyle.version}</version>
+                    </dependency>
+                </dependencies>
+                <configuration>
+                    <encoding>${project.build.sourceEncoding}</encoding>
+                    <failsOnError>true</failsOnError>
+                    <failOnViolation>true</failOnViolation>
+                    <includeTestResources>false</includeTestResources>
+                    <maxAllowedViolations>0</maxAllowedViolations>
+                    <violationSeverity>info</violationSeverity>
+                    <logViolationsToConsole>true</logViolationsToConsole>
+                    <consoleOutput>true</consoleOutput>
+                    <skip>${skip.checkstyle.check}</skip>
+                    <propertyExpansion>lineLength=${rule.line.length}</propertyExpansion>
+                    <checkstyleRules>
+                        <!--
+                            Combination
+                            of https://github.com/checkstyle/checkstyle/blob/master/src/main/resources/google_checks.xml
+                            and https://github.com/checkstyle/checkstyle/blob/master/config/checkstyle_checks.xml
+                        -->
+                        <module name="Checker">
+
+                            <!-- Properties -->
+                            <property name="charset" value="UTF-8"/>
+                            <property name="severity" value="error"/>
+                            <property name="fileExtensions" value="java, properties, xml"/>
+
+                            <!-- Suppression Comment -->
+                            <module name="SuppressionCommentFilter">
+                                <property name="offCommentFormat" value="CHECKSTYLE.OFF\: ([\w\|]+)"/>
+                                <property name="onCommentFormat" value="CHECKSTYLE.ON\: ([\w\|]+)"/>
+                                <property name="checkFormat" value="$1"/>
+                            </module>
+
+                            <!-- Checks for whitespace                               -->
+                            <!-- See http://checkstyle.sf.net/config_whitespace.html -->
+                            <module name="FileTabCharacter">
+                                <property name="eachLine" value="true"/>
+                            </module>
+
+                            <!-- Miscellaneous -->
+                            <module name="UniqueProperties"/>
+
+                            <module name="TreeWalker">
+
+                                <!-- Annotations -->
+                                <module name="AnnotationLocation">
+                                    <property name="tokens"
+                                              value="CLASS_DEF, INTERFACE_DEF, ENUM_DEF, METHOD_DEF, CTOR_DEF"/>
+                                </module>
+                                <module name="AnnotationLocation">
+                                    <property name="tokens" value="VARIABLE_DEF"/>
+                                    <property name="allowSamelineMultipleAnnotations" value="true"/>
+                                </module>
+                                <module name="AnnotationUseStyle"/>
+                                <module name="MissingDeprecated"/>
+                                <module name="MissingOverride">
+                                    <property name="javaFiveCompatibility" value="false"/>
+                                </module>
+                                <module name="PackageAnnotation"/>
+                                <module name="SuppressWarnings"/>
+                                <module name="SuppressWarningsHolder"/>
+
+                                <!-- Block Checks -->
+                                <module name="AvoidNestedBlocks">
+                                    <property name="allowInSwitchCase" value="true"/>
+                                </module>
+                                <module name="EmptyBlock">
+                                    <property name="option" value="TEXT"/>
+                                    <property name="tokens"
+                                              value="LITERAL_TRY, LITERAL_FINALLY, LITERAL_IF, LITERAL_ELSE, LITERAL_SWITCH"/>
+                                </module>
+                                <module name="EmptyCatchBlock">
+                                    <property name="exceptionVariableName" value="ignore"/>
+                                </module>
+                                <module name="NeedBraces"/>
+                                <module name="LeftCurly">
+                                    <property name="maxLineLength" value="${rule.line.length}"/>
+                                </module>
+                                <module name="RightCurly">
+                                    <property name="option" value="alone"/>
+                                    <property name="tokens"
+                                              value="CLASS_DEF, METHOD_DEF, CTOR_DEF, LITERAL_FOR, LITERAL_WHILE, LITERAL_DO, STATIC_INIT, INSTANCE_INIT"/>
+                                </module>
+
+                                <!-- Class Design -->
+                                <module name="OneTopLevelClass"/>
+                                <module name="FinalClass"/>
+                                <module name="HideUtilityClassConstructor"/>
+                                <module name="InnerTypeLast"/>
+                                <module name="InterfaceIsType"/>
+                                <module name="MutableException"/>
+                                <module name="ThrowsCount">
+                                    <property name="max" value="2"/>
+                                </module>
+                                <module name="VisibilityModifier"/>
+
+                                <!-- Coding -->
+                                <module name="FallThrough"/>
+                                <module name="IllegalTokenText">
+                                    <property name="tokens" value="STRING_LITERAL, CHAR_LITERAL"/>
+                                    <property name="format"
+                                              value="\\u00(08|09|0(a|A)|0(c|C)|0(d|D)|22|27|5(C|c))|\\(0(10|11|12|14|15|42|47)|134)"/>
+                                    <property name="message"
+                                              value="Avoid using corresponding octal or Unicode escape."/>
+                                </module>
+                                <module name="MissingSwitchDefault"/>
+                                <module name="MultipleVariableDeclarations"/>
+                                <module name="OneStatementPerLine"/>
+                                <module name="OverloadMethodsDeclarationOrder"/>
+                                <module name="VariableDeclarationUsageDistance"/>
+                                <module name="EmptyStatement"/>
+                                <module name="EqualsHashCode"/>
+                                <module name="ExplicitInitialization"/>
+                                <module name="HiddenField">
+                                    <property name="ignoreConstructorParameter" value="true"/>
+                                    <property name="ignoreSetter" value="true"/>
+                                    <property name="setterCanReturnItsClass" value="true"/>
+                                </module>
+                                <module name="IllegalCatch"/>
+                                <module name="IllegalInstantiation"/>
+                                <module name="IllegalThrows"/>
+                                <module name="IllegalToken"/>
+                                <module name="IllegalType"/>
+                                <module name="InnerAssignment"/>
+                                <module name="MagicNumber"/>
+                                <module name="MissingSwitchDefault"/>
+                                <module name="ModifiedControlVariable"/>
+                                <module name="MultipleStringLiterals"/>
+                                <module name="PackageDeclaration"/>
+                                <module name="ParameterAssignment"/>
+                                <module name="StringLiteralEquality"/>
+                                <module name="UnnecessaryParentheses"/>
+                                <module name="VariableDeclarationUsageDistance"/>
+                                <module name="NoFinalizer"/>
+
+                                <!-- Imports -->
+                                <module name="AvoidStarImport"/>
+                                <module name="IllegalImport"/>
+                                <module name="RedundantImport"/>
+                                <module name="UnusedImports"/>
+
+                                <!-- Javadoc Comments -->
+                                <module name="AtclauseOrder">
+                                    <property name="tagOrder" value="@param, @return, @throws, @deprecated"/>
+                                    <property name="target"
+                                              value="CLASS_DEF, INTERFACE_DEF, ENUM_DEF, METHOD_DEF, CTOR_DEF, VARIABLE_DEF"/>
+                                </module>
+                                <module name="JavadocMethod">
+                                    <property name="scope" value="public"/>
+                                    <property name="allowMissingParamTags" value="true"/>
+                                    <property name="allowMissingThrowsTags" value="true"/>
+                                    <property name="allowMissingReturnTag" value="true"/>
+                                    <property name="minLineCount" value="2"/>
+                                    <property name="allowedAnnotations" value="Override, Test"/>
+                                    <property name="allowThrowsTagsForSubclasses" value="true"/>
+                                </module>
+                                <module name="JavadocParagraph"/>
+                                <module name="JavadocStyle">
+                                    <property name="scope" value="public"/>
+                                </module>
+                                <module name="JavadocTagContinuationIndentation"/>
+                                <module name="NonEmptyAtclauseDescription"/>
+                                <module name="SingleLineJavadoc">
+                                    <property name="ignoreInlineTags" value="false"/>
+                                </module>
+                                <module name="SummaryJavadoc">
+                                    <property name="forbiddenSummaryFragments"
+                                              value="^@return the *|^This method returns |^A [{]@code [a-zA-Z0-9]+[}]( is a )"/>
+                                </module>
+
+                                <!-- Metrics -->
+                                <module name="CyclomaticComplexity"/>
+                                <module name="JavaNCSS"/>
+                                <module name="NPathComplexity"/>
+
+                                <!-- Misc -->
+                                <module name="ArrayTypeStyle"/>
+                                <module name="AvoidEscapedUnicodeCharacters">
+                                    <property name="allowEscapesForControlCharacters" value="true"/>
+                                    <property name="allowByTailComment" value="true"/>
+                                    <property name="allowNonPrintableEscapes" value="true"/>
+                                </module>
+                                <module name="CommentsIndentation"/>
+                                <module name="OuterTypeFilename"/>
+                                <module name="TodoComment">
+                                    <property name="format" value="(TODO)|(FIXME)"/>
+                                </module>
+                                <module name="UpperEll"/>
+                                <module name="FileContentsHolder"/>
+
+                                <!-- Modifiers -->
+                                <module name="ModifierOrder"/>
+                                <module name="RedundantModifier"/>
+
+                                <!-- Naming Conventions -->
+                                <module name="AbbreviationAsWordInName">
+                                    <property name="ignoreFinal" value="false"/>
+                                    <property name="allowedAbbreviationLength" value="1"/>
+                                </module>
+                                <module name="ClassTypeParameterName">
+                                    <property name="format" value="(^[A-Z][0-9]?)$|([A-Z][a-zA-Z0-9]*[T]$)"/>
+                                    <message key="name.invalidPattern"
+                                             value="Class type name ''{0}'' must match pattern ''{1}''."/>
+                                </module>
+                                <module name="ConstantName"/>
+                                <module name="InterfaceTypeParameterName">
+                                    <property name="format" value="(^[A-Z][0-9]?)$|([A-Z][a-zA-Z0-9]*[T]$)"/>
+                                    <message key="name.invalidPattern"
+                                             value="Interface type name ''{0}'' must match pattern ''{1}''."/>
+                                </module>
+                                <module name="LocalVariableName">
+                                    <property name="tokens" value="VARIABLE_DEF"/>
+                                    <property name="format" value="^[a-z][a-z0-9][a-zA-Z0-9]*$"/>
+                                    <property name="allowOneCharVarInForLoop" value="true"/>
+                                    <message key="name.invalidPattern"
+                                             value="Local variable name ''{0}'' must match pattern ''{1}''."/>
+                                </module>
+                                <module name="MemberName">
+                                    <property name="format" value="^[a-z][a-z0-9][a-zA-Z0-9]*$"/>
+                                    <message key="name.invalidPattern"
+                                             value="Member name ''{0}'' must match pattern ''{1}''."/>
+                                </module>
+                                <module name="MethodName">
+                                    <property name="format" value="^[a-z][a-z0-9][a-zA-Z0-9_]*$"/>
+                                    <message key="name.invalidPattern"
+                                             value="Method name ''{0}'' must match pattern ''{1}''."/>
+                                </module>
+                                <module name="MethodTypeParameterName">
+                                    <property name="format" value="(^[A-Z][0-9]?)$|([A-Z][a-zA-Z0-9]*[T]$)"/>
+                                    <message key="name.invalidPattern"
+                                             value="Method type name ''{0}'' must match pattern ''{1}''."/>
+                                </module>
+                                <module name="PackageName">
+                                    <property name="format" value="^[a-z]+(\.[a-z][a-z0-9]*)*$"/>
+                                    <message key="name.invalidPattern"
+                                             value="Package name ''{0}'' must match pattern ''{1}''."/>
+                                </module>
+                                <module name="ParameterName">
+                                    <property name="format" value="^[a-z][a-z0-9][a-zA-Z0-9]*$"/>
+                                    <message key="name.invalidPattern"
+                                             value="Parameter name ''{0}'' must match pattern ''{1}''."/>
+                                </module>
+                                <module name="CatchParameterName">
+                                    <property name="format" value="^(e|[a-z][a-z][a-zA-Z]+)$"/>
+                                </module>
+                                <module name="StaticVariableName">
+                                    <property name="format" value="^(id)|([a-z][a-z0-9][a-zA-Z0-9]+)$"/>
+                                </module>
+                                <module name="TypeName">
+                                    <message key="name.invalidPattern"
+                                             value="Type name ''{0}'' must match pattern ''{1}''."/>
+                                </module>
+
+                                <!-- Regexp -->
+
+                                <!-- Size Violations -->
+                                <module name="LineLength">
+                                    <property name="max" value="${rule.line.length}"/>
+                                    <property name="ignorePattern"
+                                              value="^package.*|^import.*|a href|href|http://|https://|ftp://"/>
+                                </module>
+
+                                <!-- Whitespace -->
+                                <module name="EmptyLineSeparator">
+                                    <property name="allowNoEmptyLineBetweenFields" value="true"/>
+                                </module>
+                                <module name="GenericWhitespace">
+                                    <message key="ws.followed"
+                                             value="GenericWhitespace ''{0}'' is followed by whitespace."/>
+                                    <message key="ws.preceded"
+                                             value="GenericWhitespace ''{0}'' is preceded with whitespace."/>
+                                    <message key="ws.illegalFollow"
+                                             value="GenericWhitespace ''{0}'' should followed by whitespace."/>
+                                    <message key="ws.notPreceded"
+                                             value="GenericWhitespace ''{0}'' is not preceded with whitespace."/>
+                                </module>
+                                <module name="MethodParamPad"/>
+                                <module name="NoLineWrap"/>
+                                <module name="NoWhitespaceBefore"/>
+                                <module name="OperatorWrap">
+                                    <property name="option" value="NL"/>
+                                    <property name="tokens"
+                                              value="BAND, BOR, BSR, BXOR, DIV, EQUAL, GE, GT, LAND, LE, LITERAL_INSTANCEOF, LOR, LT, MINUS, MOD, NOT_EQUAL, PLUS, QUESTION, SL, SR, STAR "/>
+                                </module>
+                                <module name="SeparatorWrap">
+                                    <property name="tokens" value="DOT"/>
+                                    <property name="option" value="nl"/>
+                                </module>
+                                <module name="SeparatorWrap">
+                                    <property name="tokens" value="COMMA"/>
+                                    <property name="option" value="EOL"/>
+                                </module>
+                                <module name="WhitespaceAround">
+                                    <property name="allowEmptyConstructors" value="true"/>
+                                    <property name="allowEmptyMethods" value="true"/>
+                                    <property name="allowEmptyTypes" value="true"/>
+                                    <property name="allowEmptyLoops" value="true"/>
+                                    <message key="ws.notFollowed"
+                                             value="WhitespaceAround: ''{0}'' is not followed by whitespace. Empty blocks may only be represented as '{}' when not part of a multi-block statement (4.1.3)"/>
+                                    <message key="ws.notPreceded"
+                                             value="WhitespaceAround: ''{0}'' is not preceded with whitespace."/>
+                                </module>
+
+                            </module>
+                        </module>
+                    </checkstyleRules>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>validate</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- Findbugs: Ensures well-know bugs never appear -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>findbugs-maven-plugin</artifactId>
+                <configuration>
+                    <effort>Max</effort>
+                    <threshold>Low</threshold>
+                    <xmlOutput>true</xmlOutput>
+                    <skip>${skip.findbugs.check}</skip>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+
+        </plugins>
+
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>${plugin.surefire.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.jacoco</groupId>
+                    <artifactId>jacoco-maven-plugin</artifactId>
+                    <version>${plugin.jacoco.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-checkstyle-plugin</artifactId>
+                    <version>${plugin.checkstyle.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>findbugs-maven-plugin</artifactId>
+                    <version>${plugin.findbugs.version}</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
+
+</project>
