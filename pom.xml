@@ -63,6 +63,7 @@
         <skip.findbugs.check>false</skip.findbugs.check>
 
         <!-- Rules -->
+        <rule.element.coverage>CLASS</rule.element.coverage>
         <rule.branch.coverage>0.50</rule.branch.coverage>
         <rule.line.coverage>0.50</rule.line.coverage>
         <rule.line.length>120</rule.line.length>
@@ -130,7 +131,7 @@
                             <skip>${skip.jacoco.check}</skip>
                             <rules>
                                 <rule>
-                                    <element>CLASS</element>
+                                    <element>${rule.element.coverage}</element>
                                     <limits>
                                         <limit>
                                             <counter>LINE</counter>
@@ -167,7 +168,7 @@
                     <failOnViolation>true</failOnViolation>
                     <includeTestResources>false</includeTestResources>
                     <maxAllowedViolations>0</maxAllowedViolations>
-                    <violationSeverity>info</violationSeverity>
+                    <violationSeverity>warning</violationSeverity>
                     <logViolationsToConsole>true</logViolationsToConsole>
                     <consoleOutput>true</consoleOutput>
                     <skip>${skip.checkstyle.check}</skip>
@@ -283,10 +284,14 @@
                                 <module name="IllegalToken"/>
                                 <module name="IllegalType"/>
                                 <module name="InnerAssignment"/>
-                                <module name="MagicNumber"/>
+                                <module name="MagicNumber">
+                                    <property name="severity" value="info"/>
+                                </module>
                                 <module name="MissingSwitchDefault"/>
                                 <module name="ModifiedControlVariable"/>
-                                <module name="MultipleStringLiterals"/>
+                                <module name="MultipleStringLiterals">
+                                    <property name="allowedDuplicates" value="5"/>
+                                </module>
                                 <module name="PackageDeclaration"/>
                                 <module name="ParameterAssignment"/>
                                 <module name="StringLiteralEquality"/>
@@ -345,6 +350,7 @@
                                 <module name="OuterTypeFilename"/>
                                 <module name="TodoComment">
                                     <property name="format" value="(TODO)|(FIXME)"/>
+                                    <property name="severity" value="info"/>
                                 </module>
                                 <module name="UpperEll"/>
                                 <module name="FileContentsHolder"/>
@@ -495,8 +501,6 @@
                     </execution>
                 </executions>
             </plugin>
-
-
         </plugins>
 
         <pluginManagement>
