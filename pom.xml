@@ -3,7 +3,7 @@
 
     <groupId>com.bahadirakin</groupId>
     <artifactId>grand-parent-pom</artifactId>
-    <version>1.1-SNAPSHOT</version>
+    <version>1.2-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>grand-parent-pom</name>
