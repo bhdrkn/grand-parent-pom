@@ -18,7 +18,7 @@ Add this project as a parent to your parent pom.
   <parent>
       <groupId>com.bahadirakin</groupId>
       <artifactId>grand-parent-pom</artifactId>
-      <version>1.0</version>
+      <version>1.1</version>
   </parent>
   ...
 </project>
