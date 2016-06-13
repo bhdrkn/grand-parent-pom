@@ -363,8 +363,8 @@
 
                                 <!-- Naming Conventions -->
                                 <module name="AbbreviationAsWordInName">
-                                    <property name="ignoreFinal" value="false" />
-                                    <property name="allowedAbbreviationLength" value="1" />
+                                    <property name="ignoreFinal" value="true" />
+                                    <property name="allowedAbbreviationLength" value="4" />
                                 </module>
                                 <module name="ClassTypeParameterName">
                                     <property name="format" value="(^[A-Z][0-9]?)$|([A-Z][a-zA-Z0-9]*[T]$)" />
